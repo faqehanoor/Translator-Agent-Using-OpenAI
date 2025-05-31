@@ -4,13 +4,15 @@ from dotenv import load_dotenv
 import os
 import asyncio
 
-# Load environment variables
+# Load environment variables (works locally)
 load_dotenv()
-gemini_api_key = os.getenv("GEMINI_API_KEY")
+
+# Get API key (works for both local and Streamlit Cloud)
+gemini_api_key = os.getenv("GEMINI_API_KEY", default=st.secrets.get("GEMINI_API_KEY", None))
 
 # Check for API key
 if not gemini_api_key:
-    st.error("GEMINI_API_KEY not found in .env file")
+    st.error("❌ GEMINI_API_KEY not found. Add it to your .env file (for local) or Secrets (on Streamlit Cloud).")
     st.stop()
 
 # Setup Gemini-compatible client
@@ -49,14 +51,14 @@ input_text = st.text_area("Enter your text with translation instruction:",
 
 if st.button("Translate"):
     if not input_text.strip():
-        st.warning("Please enter some text to translate.")
+        st.warning("⚠️ Please enter some text to translate.")
     else:
-        with st.spinner("Translating..."):
+        with st.spinner("🔄 Translating..."):
             try:
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 result = loop.run_until_complete(translate_text(input_text))
-                st.success("Translation:")
+                st.success("✅ Translation:")
                 st.markdown(f"**{result.final_output}**")
             except Exception as e:
                 st.error(f"❌ Error: {str(e)}")
